@@ -1,0 +1,24 @@
+version: '3.1'
+services:
+  app:
+    container_name: app-Nodejs-demo-project
+    restart: always
+    build: .
+    volumes:
+      - .:/usr/src/app
+      - ./node_modules:/usr/src/app/node_modules
+    command: bash -c "npm install && npm run build && npx sequelize-cli db:migrate && npm run start:prod"
+    environment:
+      - NODE_ENV=production
+    env_file:
+      - ./.env
+    networks: 
+      - docker-stack_dev-network
+    external_links:
+      - pg_db:pg
+    ports:
+      - '3000:3000'
+
+networks:
+  docker-stack_dev-network:
+    external: true

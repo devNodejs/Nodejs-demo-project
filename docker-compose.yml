@@ -1,0 +1,42 @@
+version: '3.1'
+services:
+  db:
+    container_name: pg-Nodejs-demo-project
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: ${PG_USER}
+      POSTGRES_PASSWORD: ${PG_PASSWORD}
+      POSTGRES_DB: ${PG_NAME}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    networks:
+      - Nodejs-demo-project-network
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./data/postgres/pgdata:/var/lib/postgresql/data/pgdata
+
+  app:
+    container_name: app-Nodejs-demo-project
+    build: .
+    volumes:
+      - .:/usr/src/app
+      - ./node_modules:/usr/src/app/node_modules
+    networks:
+      - Nodejs-demo-project-network
+    command: bash -c "npm install && npm run migrate && npx sequelize-cli db:migrate && npm start"
+    environment:
+      - NODE_ENV=development
+    env_file:
+      - ./.env
+    ports:
+      - '3000:3000'
+    links:
+      - db
+    depends_on:
+      - db
+      
+networks:
+  Nodejs-demo-project-network:
+
+volumes:
+  postgres_data:
